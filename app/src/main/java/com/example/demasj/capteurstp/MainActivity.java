@@ -1,12 +1,17 @@
 package com.example.demasj.capteurstp;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.*;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -17,6 +22,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
+    private Location location;
     private SensorManager mSensorManager;
     private List interList;
     private Sensor accelerometre;
@@ -33,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     double x;
     double y;
     double z;
+    private TextView longitude;
+    private TextView latitude;
 
 
     @Override
@@ -49,13 +57,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         direction = findViewById(R.id.direction);
         direction2 = findViewById(R.id.direction2);
         back = findViewById(R.id.background);
+        longitude = findViewById(R.id.longitude);
+        latitude = findViewById(R.id.latitude);
+
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> deviceSensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         interList = new ArrayList();
 
-        for(int i = 0; i < deviceSensors.size(); i++) {
+        for (int i = 0; i < deviceSensors.size(); i++) {
             System.out.println("Élément à l'index " + i + " = " + deviceSensors.get(i).getName());
             interList.add(deviceSensors.get(i).getName());
         }
@@ -66,6 +79,43 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ArrayAdapter<Sensor> adapter = new ArrayAdapter<Sensor>(MainActivity.this, android.R.layout.simple_list_item_1, deviceSensors);
         liste.setAdapter(adapter);
 
+        ArrayList<LocationProvider> providers = new ArrayList<LocationProvider>();
+        List<String> names = locationManager.getProviders(true);
+
+        for (String name : names)
+            providers.add(locationManager.getProvider(name));
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 15000, 0, new LocationListener() {
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+
+                @Override
+                public void onLocationChanged(Location location) {
+                    Log.d("GPS", "Latitude " + location.getLatitude() + " et longitude " + location.getLongitude());
+                    longitude.setText("Longitude:"+location.getLongitude());
+                    latitude.setText("Latitude:"+location.getLatitude());
+                }
+            });
+            
+            return;
+        }
+
         accelerometre  = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if(accelerometre != null) {
             vue.setText("IL Y A UN ACCELEROMETRE");
@@ -75,7 +125,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mSensorManager.registerListener(this, accelerometre, SensorManager.SENSOR_DELAY_UI);
         var2 = new Float(0);
+
+
     }
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {
