@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private List interList;
     private Sensor accelerometre;
+    private Sensor proximite;
     private TextView axeX;
     private TextView axeY;
     private TextView axeZ;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView blabla;
     private TextView direction;
     private TextView direction2;
+    private TextView distance;
     double x;
     double y;
     double z;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         blabla = findViewById(R.id.blabla);
         direction = findViewById(R.id.direction);
         direction2 = findViewById(R.id.direction2);
+        distance = findViewById(R.id.distance);
         back = findViewById(R.id.background);
 
 
@@ -67,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         liste.setAdapter(adapter);
 
         accelerometre  = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        proximite = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         if(accelerometre != null) {
             vue.setText("IL Y A UN ACCELEROMETRE");
         } else {
@@ -74,51 +78,61 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         mSensorManager.registerListener(this, accelerometre, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, proximite, SensorManager.SENSOR_DELAY_UI);
         var2 = new Float(0);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType()==Sensor.TYPE_ACCELEROMETER) {
+            axeX.setText("" + event.values[0]);
+            axeY.setText("" + event.values[1]);
+            axeZ.setText("" + event.values[2]);
 
-        axeX.setText(""+event.values[0]);
-        axeY.setText(""+event.values[1]);
-        axeZ.setText(""+event.values[2]);
+            double valx = x;
+            double valz = z;
 
-        double valx = x;
-        double valz = z;
-
-        double x = event.values[0];
-        double y = event.values[1];
-        double z = event.values[2];
+            double x = event.values[0];
+            double y = event.values[1];
+            double z = event.values[2];
 
 
 
-        double xx = x*x;
-        double yy = y*y;
-        double zz = z*z;
+            double xx = x*x;
+            double yy = y*y;
+            double zz = z*z;
 
-        var1 = xx+yy+zz;
+            var1 = xx+yy+zz;
 
-        blabla.setText(""+var1);
+            blabla.setText(""+var1);
 
-        if (var1 < 150) {
-            back.setBackgroundColor(0xffA3CB38); //vert
-        } else if (var1 <300) {
-            back.setBackgroundColor(0xffF79F1F); //rouge
-        } else {
-            back.setBackgroundColor(0xffEA2027); //orange
+            if (var1 < 150) {
+                back.setBackgroundColor(0xffA3CB38); //vert
+            } else if (var1 <300) {
+                back.setBackgroundColor(0xffF79F1F); //rouge
+            } else {
+                back.setBackgroundColor(0xffEA2027); //orange
+            }
+
+            if ( valx < x ) {
+                direction.setText("GAUCHE");
+            } else if ( valx > x ) {
+                direction.setText("DROITE");
+            }
+
+            if ( valz < z ) {
+                direction2.setText("HAUT");
+            } else if ( valz > z ) {
+                direction2.setText("BAS");
+            }
         }
-
-        if ( valx < x ) {
-            direction.setText("GAUCHE");
-        } else if ( valx > x ) {
-            direction.setText("DROITE");
-        }
-
-        if ( valz < z ) {
-            direction2.setText("HAUT");
-        } else if ( valz > z ) {
-            direction2.setText("BAS");
+        if (event.sensor.getType()==Sensor.TYPE_PROXIMITY) {
+            distance.setText(""+event.values[0]);
+            if ( event.values[0]==0 ) {
+                distance.setText("PRES");
+            } else {
+                distance.setText("LOIN");
+            }
         }
 
 
