@@ -23,11 +23,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView axeX;
     private TextView axeY;
     private TextView axeZ;
-    private Float var1;
+    private double var1;
     private Float var2;
     private Float diff;
     private View back;
     private TextView blabla;
+    private TextView direction;
+    private TextView direction2;
+    double x;
+    double y;
+    double z;
 
 
     @Override
@@ -41,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         axeY = findViewById(R.id.axeY);
         axeZ = findViewById(R.id.axeZ);
         blabla = findViewById(R.id.blabla);
+        direction = findViewById(R.id.direction);
+        direction2 = findViewById(R.id.direction2);
         back = findViewById(R.id.background);
 
 
@@ -75,18 +82,46 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         axeX.setText(""+event.values[0]);
         axeY.setText(""+event.values[1]);
-        axeY.setText(""+event.values[2]);
+        axeZ.setText(""+event.values[2]);
+
+        double valx = x;
+        double valz = z;
+
+        double x = event.values[0];
+        double y = event.values[1];
+        double z = event.values[2];
 
 
-        var1 = event.values[0];
 
-        if (var1 < 6) {
+        double xx = x*x;
+        double yy = y*y;
+        double zz = z*z;
+
+        var1 = xx+yy+zz;
+
+        blabla.setText(""+var1);
+
+        if (var1 < 150) {
             back.setBackgroundColor(0xffA3CB38); //vert
-        } else if (var1 <15) {
+        } else if (var1 <300) {
             back.setBackgroundColor(0xffF79F1F); //rouge
         } else {
             back.setBackgroundColor(0xffEA2027); //orange
         }
+
+        if ( valx < x ) {
+            direction.setText("GAUCHE");
+        } else if ( valx > x ) {
+            direction.setText("DROITE");
+        }
+
+        if ( valz < z ) {
+            direction2.setText("HAUT");
+        } else if ( valz > z ) {
+            direction2.setText("BAS");
+        }
+
+
 
     }
 
